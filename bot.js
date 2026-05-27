@@ -1,7 +1,7 @@
 const http = require("http");
 const mineflayer = require("mineflayer");
 
-/* ========= SERVEUR WEB POUR RENDER ========= */
+/* ===== SERVEUR WEB ===== */
 
 http
   .createServer((req, res) => {
@@ -12,9 +12,11 @@ http
     console.log("Serveur web actif");
   });
 
-/* ========= BOT MINECRAFT ========= */
+/* ===== BOT ===== */
 
-function createBot() {
+function startBot() {
+  console.log("Création du bot...");
+
   const bot = mineflayer.createBot({
     host: "heilsynth666-43Se.aternos.me",
     port: 63545,
@@ -22,6 +24,8 @@ function createBot() {
     version: "1.19.2",
     checkTimeoutInterval: 50 * 1000,
   });
+
+  /* ===== CONNEXION ===== */
 
   bot.on("login", () => {
     console.log("Connecté !");
@@ -51,18 +55,29 @@ function createBot() {
     }, 60000);
   });
 
+  /* ===== RECONNEXION ===== */
+
+  bot.on("end", () => {
+    console.log("Déconnecté");
+    reconnect();
+  });
+
   bot.on("kicked", (reason) => {
     console.log("Kick:", reason);
+    reconnect();
   });
 
   bot.on("error", (err) => {
     console.log("Erreur:", err.message);
   });
 
-  bot.on("end", () => {
-    console.log("Reconnecte dans 60 sec...");
-    setTimeout(createBot, 60000);
-  });
+  function reconnect() {
+    console.log("Reconnecte dans 60 secondes...");
+
+    setTimeout(() => {
+      startBot();
+    }, 60000);
+  }
 }
 
-createBot();
+startBot();
