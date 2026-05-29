@@ -32,6 +32,7 @@ function startBot() {
     host: "arasaka.aternos.me",
     port: 50044,
     username: "BotAFK",
+    version: false,
     version: "1.20.1",
     checkTimeoutInterval: 50 * 1000,
   });
