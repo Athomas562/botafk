@@ -21,7 +21,7 @@ function startBot() {
     host: "arasaka.aternos.me",
     port: 50044,
     username: "BotAFK",
-    version: "1.19.2",
+    version: "1.20.1",
     checkTimeoutInterval: 50 * 1000,
   });
 
@@ -81,3 +81,20 @@ function startBot() {
 }
 
 startBot();
+
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+  res.status(200).send("Bot online");
+});
+
+app.head("/", (req, res) => {
+  res.status(200).end();
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Serveur actif sur ${PORT}`);
+});
