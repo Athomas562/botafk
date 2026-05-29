@@ -18,8 +18,8 @@ function startBot() {
   console.log("Création du bot...");
 
   const bot = mineflayer.createBot({
-    host: "heilsynth666-43Se.aternos.me",
-    port: 63545,
+    host: "arasaka.aternos.me",
+    port: 50044,
     username: "BotAFK",
     version: "1.19.2",
     checkTimeoutInterval: 50 * 1000,
