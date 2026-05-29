@@ -1,16 +1,23 @@
-const http = require("http");
+const express = require("express");
 const mineflayer = require("mineflayer");
+
+const app = express();
 
 /* ===== SERVEUR WEB ===== */
 
-http
-  .createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("Bot actif");
-  })
-  .listen(process.env.PORT || 3000, () => {
-    console.log("Serveur web actif");
-  });
+app.get("/", (req, res) => {
+  res.status(200).send("Bot online");
+});
+
+app.head("/", (req, res) => {
+  res.status(200).end();
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Serveur web actif sur ${PORT}`);
+});
 
 /* ===== BOT ===== */
 
@@ -25,8 +32,6 @@ function startBot() {
     checkTimeoutInterval: 50 * 1000,
   });
 
-  /* ===== CONNEXION ===== */
-
   bot.on("login", () => {
     console.log("Connecté !");
   });
@@ -34,8 +39,7 @@ function startBot() {
   bot.on("spawn", () => {
     console.log("Spawn OK");
 
-    /* ===== ANTI AFK ===== */
-
+    // Anti AFK
     setInterval(() => {
       bot.setControlState("jump", true);
 
@@ -44,8 +48,7 @@ function startBot() {
       }, 500);
     }, 30000);
 
-    /* ===== PETIT MOUVEMENT ===== */
-
+    // Petit mouvement
     setInterval(() => {
       bot.setControlState("forward", true);
 
@@ -55,46 +58,24 @@ function startBot() {
     }, 60000);
   });
 
-  /* ===== RECONNEXION ===== */
-
   bot.on("end", () => {
     console.log("Déconnecté");
-    reconnect();
+
+    setTimeout(() => {
+      startBot();
+    }, 60000);
   });
 
   bot.on("kicked", (reason) => {
     console.log("Kick:", reason);
-    reconnect();
   });
 
   bot.on("error", (err) => {
     console.log("Erreur:", err.message);
   });
-
-  function reconnect() {
-    console.log("Reconnecte dans 60 secondes...");
-
-    setTimeout(() => {
-      startBot();
-    }, 60000);
-  }
 }
 
+process.on("uncaughtException", console.error);
+process.on("unhandledRejection", console.error);
+
 startBot();
-
-const express = require("express");
-const app = express();
-
-app.get("/", (req, res) => {
-  res.status(200).send("Bot online");
-});
-
-app.head("/", (req, res) => {
-  res.status(200).end();
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Serveur actif sur ${PORT}`);
-});
