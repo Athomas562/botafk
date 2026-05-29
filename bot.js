@@ -24,6 +24,7 @@ app.listen(PORT, "0.0.0.0", () => {
 let bot = null;
 let jumpInterval = null;
 let moveInterval = null;
+let antiAfkInterval = null;
 
 function startBot() {
   console.log("Création du bot...");
@@ -32,9 +33,7 @@ function startBot() {
     host: "arasaka.aternos.me",
     port: 50044,
     username: "BotAFK",
-    version: false,
-    version: "1.20.1",
-    checkTimeoutInterval: 50 * 1000,
+    version: false, // plus stable que 1.20.1 fixe
   });
 
   bot.on("login", () => {
@@ -44,11 +43,12 @@ function startBot() {
   bot.on("spawn", () => {
     console.log("Spawn OK");
 
-    // Nettoyage des anciens intervals (IMPORTANT)
+    // Nettoyage anti fuite mémoire
     if (jumpInterval) clearInterval(jumpInterval);
     if (moveInterval) clearInterval(moveInterval);
+    if (antiAfkInterval) clearInterval(antiAfkInterval);
 
-    // Anti-AFK jump
+    // Jump anti-AFK
     jumpInterval = setInterval(() => {
       if (!bot || !bot.entity) return;
 
@@ -58,7 +58,7 @@ function startBot() {
       }, 500);
     }, 30000);
 
-    // Petit mouvement
+    // Mouvement
     moveInterval = setInterval(() => {
       if (!bot || !bot.entity) return;
 
@@ -67,33 +67,40 @@ function startBot() {
         if (bot) bot.setControlState("forward", false);
       }, 2000);
     }, 60000);
-  });
 
-  bot.on("end", () => {
-    console.log("Déconnecté");
+    // Anti timeout serveur (petit signal régulier)
+    antiAfkInterval = setInterval(() => {
+      if (!bot || !bot.entity) return;
 
-    // Nettoyage propre (évite memory leak)
-    try {
-      if (jumpInterval) clearInterval(jumpInterval);
-      if (moveInterval) clearInterval(moveInterval);
-
-      if (bot) {
-        bot.removeAllListeners();
-        bot = null;
-      }
-    } catch (e) {
-      console.log("Cleanup error:", e.message);
-    }
-
-    setTimeout(startBot, 60000);
+      try {
+        bot.chat(".");
+      } catch (e) {}
+    }, 120000);
   });
 
   bot.on("kicked", (reason) => {
-    console.log("Kick:", reason);
+    console.log("KICK:", reason);
   });
 
   bot.on("error", (err) => {
     console.log("Erreur:", err.message);
+  });
+
+  bot.on("end", () => {
+    console.log("Déconnecté, reconnexion...");
+
+    // Nettoyage propre
+    try {
+      if (jumpInterval) clearInterval(jumpInterval);
+      if (moveInterval) clearInterval(moveInterval);
+      if (antiAfkInterval) clearInterval(antiAfkInterval);
+
+      bot.removeAllListeners();
+      bot = null;
+    } catch (e) {}
+
+    // reconnexion plus rapide et stable
+    setTimeout(startBot, 10000);
   });
 }
 
