@@ -1,4 +1,4 @@
-  {
+{
   "name": "botafk",
   "version": "1.0.0",
   "main": "index.js",
@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "Bot AFK Minecraf",
   "dependencies": {
+    "express": "^4.18.2",
     "mineflayer": "^4.37.1"
   }
 }
