@@ -99,12 +99,11 @@ function startBot() {
       bot = null;
     } catch (e) {}
 
-    // reconnexion plus rapide et stable
+    
     setTimeout(startBot, 10000);
   });
 }
 
-/* ===== PROTECTION CRASH ===== */
 
 process.setMaxListeners(0);
 
@@ -116,6 +115,6 @@ process.on("unhandledRejection", (err) => {
   console.log("Promise crash:", err);
 });
 
-/* ===== START ===== */
+
 
 startBot();
